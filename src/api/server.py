@@ -53,4 +53,4 @@ async def validation_exception_handler(request, exc):
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to RCF."}
+    return {"message": "Welcome to RileyCF."}
