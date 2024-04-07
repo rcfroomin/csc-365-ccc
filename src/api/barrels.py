@@ -30,14 +30,22 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
-    print(wholesale_catalog)
-
+    for barrel in wholesale_catalog:
+        if barrel.potion_type == [0, 100, 0, 0]:
+            with db.engine.begin() as connection:
+                num_green_potions_inv = connection.execute(sqlalchemy.text("SELECT num_green_potions from global_inventory;"))
+                num_gold_inv = connection.execute(sqlalchemy.text("SELECT gold from global_inventory;"))
+            if num_green_potions_inv < 10 and num_gold_inv >= barrel.price:
+                return [
+                    {
+                        "sku": barrel.sku,
+                        "quantity": barrel.quantity,
+                    }
+                ]
+            
     return [
         {
             "sku": "SMALL_RED_BARREL",
-            "quantity": 1,
+            "quantity": 0,
         }
     ]
-
-#with db.engine.begin() as connection:
-        #result = connection.execute(sqlalchemy.text(sql_to_execute))
