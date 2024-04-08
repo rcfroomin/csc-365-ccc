@@ -27,6 +27,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
         if barrel.potion_type == [0, 100, 0, 0]:
             with db.engine.begin() as connection:
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml = num_green_ml + :quantity ;"), quantity=barrel.quantity)
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold -+ :price ;"), price=barrel.price)
+
     return "OK"
 
 # Gets called once a day
