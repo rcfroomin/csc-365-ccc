@@ -28,6 +28,14 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
             with db.engine.begin() as connection:
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml = num_green_ml + :quantity ;"), quantity=barrel.quantity)
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold -+ :price ;"), price=barrel.price)
+        elif barrel.potion_type == [100, 0, 0, 0]:
+            with db.engine.begin() as connection:
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red_ml + :quantity ;"), quantity=barrel.quantity)
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold -+ :price ;"), price=barrel.price)
+        elif barrel.potion_type == [0, 0, 100, 0]:
+            with db.engine.begin() as connection:
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_ml = num_blue_ml + :quantity ;"), quantity=barrel.quantity)
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold -+ :price ;"), price=barrel.price)
 
     return "OK"
 
@@ -49,7 +57,35 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         "sku": barrel.sku,
                         "quantity": 1
                     }
-                ]
+                ]   
+        if barrel.potion_type == [100, 0, 0, 0]:
+            with db.engine.begin() as connection:
+                cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
+                row1 = cur.fetchone()
+                num_red_potions = row1[3]
+                num_gold = row1[2]
+                cur.close()
+            if num_red_potions < 1 and num_gold >= barrel.price:
+                return [
+                    {
+                        "sku": barrel.sku,
+                        "quantity": 1
+                    }
+                ]   
+        if barrel.potion_type == [0, 0, 100, 0]:
+            with db.engine.begin() as connection:
+                cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
+                row1 = cur.fetchone()
+                num_blue_potions = row1[4]
+                num_gold = row1[2]
+                cur.close()
+            if num_blue_potions < 1 and num_gold >= barrel.price:
+                return [
+                    {
+                        "sku": barrel.sku,
+                        "quantity": 1
+                    }
+                ]   
             
     return [
     ]
