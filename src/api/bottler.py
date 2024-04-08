@@ -24,6 +24,14 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             with db.engine.begin() as connection:
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_potions = num_green_potions + :quantity ;"), quantity=potion.quantity)
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml = num_green_ml - :quantity ;"), quantity=(potion.quantity * 100))
+        if potion.potion_type == [100, 0, 0, 0]:
+            with db.engine.begin() as connection:
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_potions = num_red_potions + :quantity ;"), quantity=potion.quantity)
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red_ml - :quantity ;"), quantity=(potion.quantity * 100))
+        if potion.potion_type == [0, 0, 100, 0]:
+            with db.engine.begin() as connection:
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_potions = num_blue_potions + :quantity ;"), quantity=potion.quantity)
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_ml = num_blue_ml - :quantity ;"), quantity=(potion.quantity * 100))
     return "OK"
 
 @router.post("/plan")
@@ -37,17 +45,29 @@ def get_bottle_plan():
     # Expressed in integers from 1 to 100 that must sum up to 100.
 
     with db.engine.begin() as connection:
-                #num_green_ml_inv = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
                 cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
                 row1 = cur.fetchone()
                 num_green_ml = row1[1]
+                num_red_ml = row1[5]
+                num_blue_ml = row1[6]
                 cur.close()
-    num_bottles_to_make = num_green_ml // 100
+    num_g_bottles_to_make = num_green_ml // 100
+    num_r_bottles_to_make = num_red_ml // 100
+    num_b_bottles_to_make = num_blue_ml // 100
+
 
     return [
             {
                 "potion_type": [0, 100, 0, 0],
-                "quantity": num_bottles_to_make,
+                "quantity": num_g_bottles_to_make,
+            },
+            {
+                "potion_type": [100, 0, 0, 0],
+                "quantity": num_r_bottles_to_make,
+            },
+            {
+                "potion_type": [0, 0, 100, 0],
+                "quantity": num_b_bottles_to_make,
             }
         ]
 
