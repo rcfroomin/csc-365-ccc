@@ -39,13 +39,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 return [
                     {
                         "sku": barrel.sku,
-                        "quantity": barrel.quantity,
+                        "ml_per_barrel": barrel.ml_per_barrel,
+                        "potion_type": barrel.potion_type,
+                         "quantity": barrel.quantity
                     }
                 ]
             
     return [
         {
-            "sku": "SMALL_RED_BARREL",
+            "sku": "none",
             "quantity": 0,
         }
     ]
