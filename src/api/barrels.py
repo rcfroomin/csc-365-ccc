@@ -23,7 +23,10 @@ class Barrel(BaseModel):
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
-
+    for barrel in barrels_delivered:
+        if barrel.potion_type == [0, 100, 0, 0]:
+            with db.engine.begin() as connection:
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml = num_green_ml + :quantity ;"), quantity=barrel.quantity)
     return "OK"
 
 # Gets called once a day
