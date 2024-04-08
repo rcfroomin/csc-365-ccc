@@ -38,13 +38,16 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     for barrel in wholesale_catalog:
         if barrel.potion_type == [0, 100, 0, 0]:
             with db.engine.begin() as connection:
-                num_green_potions_inv = connection.execute(sqlalchemy.text("SELECT num_green_potions from global_inventory;"))
-                num_gold_inv = connection.execute(sqlalchemy.text("SELECT gold from global_inventory;"))
-            if num_green_potions_inv < 10 and num_gold_inv >= barrel.price:
+                cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
+                row1 = cur.fetchone()
+                num_green_potions = row1[0]
+                num_gold = row1[2]
+                cur.close()
+            if num_green_potions < 10 and num_gold >= barrel.price:
                 return [
                     {
                         "sku": barrel.sku,
-                         "quantity": 1
+                        "quantity": 1
                     }
                 ]
             
