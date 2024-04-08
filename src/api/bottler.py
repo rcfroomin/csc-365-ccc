@@ -28,16 +28,18 @@ def get_bottle_plan():
     Go from barrel to bottle.
     """
 
-    # Each bottle has a quantity of what proportion of red, blue, and
-    # green potion to add.
+    # Each bottle has a quantity of what proportion of red, green, blue and
+    # dark potion to add.
     # Expressed in integers from 1 to 100 that must sum up to 100.
 
-    # Initial logic: bottle all barrels into red potions.
+    with db.engine.begin() as connection:
+                num_green_ml_inv = connection.execute(sqlalchemy.text("SELECT num_green_ml from global_inventory;"))
+    num_bottles_to_make = num_green_ml_inv // 100
 
     return [
             {
-                "potion_type": [100, 0, 0, 0],
-                "quantity": 5,
+                "potion_type": [0, 100, 0, 0],
+                "quantity": num_bottles_to_make,
             }
         ]
 
