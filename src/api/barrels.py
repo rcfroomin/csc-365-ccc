@@ -25,17 +25,23 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
     for barrel in barrels_delivered:
         if barrel.potion_type == [0, 100, 0, 0]:
+            quantity = barrel.quantity
+            price = barrel.price
             with db.engine.begin() as connection:
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml = num_green_ml + :quantity ;"), quantity=barrel.quantity)
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold -+ :price ;"), price=barrel.price)
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml = num_green_ml + " + str(quantity) + ";"))
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold - " + str(price) + ";"))
         elif barrel.potion_type == [100, 0, 0, 0]:
+            quantity = barrel.quantity
+            price = barrel.price
             with db.engine.begin() as connection:
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red_ml + :quantity ;"), quantity=barrel.quantity)
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold -+ :price ;"), price=barrel.price)
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red_ml + " + str(quantity) + ";"))
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold - " + str(price) + ";"))
         elif barrel.potion_type == [0, 0, 100, 0]:
+            quantity = barrel.quantity
+            price = barrel.price
             with db.engine.begin() as connection:
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_ml = num_blue_ml + :quantity ;"), quantity=barrel.quantity)
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold -+ :price ;"), price=barrel.price)
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_ml = num_blue_ml + " + str(quantity) + ";"))
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold - " + str(price) + ";"))
 
     return "OK"
 

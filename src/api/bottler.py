@@ -24,20 +24,20 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             p_quantity = potion.quantity
             ml_quantity = potion.quantity * 100
             with db.engine.begin() as connection:
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_potions = num_green_potions + " + p_quantity + ";"))
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml = num_green_ml - " + ml_quantity + ";"))
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_potions = num_green_potions + " + str(p_quantity) + ";"))
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml = num_green_ml - " + str(ml_quantity) + ";"))
         if potion.potion_type == [100, 0, 0, 0]:
             p_quantity = potion.quantity
             ml_quantity = potion.quantity * 100
             with db.engine.begin() as connection:
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_potions = num_red_potions + " + p_quantity + ";"))
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red_ml - " + ml_quantity + ";"))
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_potions = num_red_potions + " + str(p_quantity) + ";"))
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red_ml - " + str(ml_quantity) + ";"))
         if potion.potion_type == [0, 0, 100, 0]:
             p_quantity = potion.quantity
             ml_quantity = potion.quantity * 100
             with db.engine.begin() as connection:
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_potions = num_blue_potions + " + p_quantity + ";"))
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_ml = num_blue_ml - " + ml_quantity + ";"))
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_potions = num_blue_potions + " + str(p_quantity) + ";"))
+                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_ml = num_blue_ml - " + str(ml_quantity) + ";"))
     return "OK"
 
 @router.post("/plan")
