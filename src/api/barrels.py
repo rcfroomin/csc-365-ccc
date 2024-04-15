@@ -49,6 +49,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
+    print(f"wholesale catalog: {wholesale_catalog}")
     for barrel in wholesale_catalog:
         if barrel.potion_type == [0, 100, 0, 0]:
             with db.engine.begin() as connection:
@@ -58,6 +59,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 num_gold = row1[2]
                 cur.close()
             if num_green_potions < 10 and num_gold >= barrel.price:
+                print(f"want to buy a green barrel: {barrel.sku}")
                 return [
                     {
                         "sku": barrel.sku,
@@ -72,6 +74,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 num_gold = row1[2]
                 cur.close()
             if num_red_potions < 10 and num_gold >= barrel.price:
+                print(f"want to buy a red barrel: {barrel.sku}")
                 return [
                     {
                         "sku": barrel.sku,
@@ -86,6 +89,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 num_gold = row1[2]
                 cur.close()
             if num_blue_potions < 10 and num_gold >= barrel.price:
+                print(f"want to buy a blue barrel: {barrel.sku}")
                 return [
                     {
                         "sku": barrel.sku,
@@ -93,5 +97,4 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     }
                 ]   
             
-    return [
-    ]
+    return []
