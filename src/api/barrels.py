@@ -71,7 +71,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 num_red_potions = row1[3]
                 num_gold = row1[2]
                 cur.close()
-            if num_red_potions < 1 and num_gold >= barrel.price:
+            if num_red_potions < 10 and num_gold >= barrel.price:
                 return [
                     {
                         "sku": barrel.sku,
@@ -85,7 +85,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 num_blue_potions = row1[4]
                 num_gold = row1[2]
                 cur.close()
-            if num_blue_potions < 1 and num_gold >= barrel.price:
+            if num_blue_potions < 10 and num_gold >= barrel.price:
                 return [
                     {
                         "sku": barrel.sku,
