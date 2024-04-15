@@ -24,19 +24,19 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
     for barrel in barrels_delivered:
-        if barrel.potion_type == [0, 100, 0, 0]:
+        if barrel.potion_type == [0, 1, 0, 0]:
             quantity = barrel.quantity
             price = barrel.price
             with db.engine.begin() as connection:
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml = num_green_ml + " + str(quantity) + ";"))
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold - " + str(price) + ";"))
-        elif barrel.potion_type == [100, 0, 0, 0]:
+        elif barrel.potion_type == [1, 0, 0, 0]:
             quantity = barrel.quantity
             price = barrel.price
             with db.engine.begin() as connection:
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red_ml + " + str(quantity) + ";"))
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold - " + str(price) + ";"))
-        elif barrel.potion_type == [0, 0, 100, 0]:
+        elif barrel.potion_type == [0, 0, 1, 0]:
             quantity = barrel.quantity
             price = barrel.price
             with db.engine.begin() as connection:
@@ -51,7 +51,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
     print(f"wholesale catalog: {wholesale_catalog}")
     for barrel in wholesale_catalog:
-        if barrel.potion_type == [0, 100, 0, 0]:
+        if barrel.potion_type == [0, 1, 0, 0]:
             with db.engine.begin() as connection:
                 cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
                 row1 = cur.fetchone()
@@ -66,7 +66,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         "quantity": 1
                     }
                 ]   
-        if barrel.potion_type == [100, 0, 0, 0]:
+        if barrel.potion_type == [1, 0, 0, 0]:
             with db.engine.begin() as connection:
                 cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
                 row1 = cur.fetchone()
@@ -81,7 +81,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         "quantity": 1
                     }
                 ]   
-        if barrel.potion_type == [0, 0, 100, 0]:
+        if barrel.potion_type == [0, 0, 1, 0]:
             with db.engine.begin() as connection:
                 cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
                 row1 = cur.fetchone()
