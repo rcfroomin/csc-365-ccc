@@ -17,6 +17,7 @@ def get_catalog():
         num_red_potions_num = row1[3]
         num_blue_potions_num = row1[4]
         cur.close()
+    print(f"Potions Inventory: green: { num_green_potions_num} red: {num_red_potions_num} blue: {num_blue_potions_num}")
     if (num_green_potions_num > 0):
         return [
             {
