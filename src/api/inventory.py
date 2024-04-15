@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
 import math
+import sqlalchemy
+from src import database as db
 
 router = APIRouter(
     prefix="/inventory",
@@ -12,8 +14,19 @@ router = APIRouter(
 @router.get("/audit")
 def get_inventory():
     """ """
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
+        row1 = cur.fetchone()
+        green_potions = row1[0]
+        gold = row1[2]
+        red_potions = row1[3]
+        blue_potions = row1[4]
+        green_ml = row1[1]
+        red_ml = row1[5]
+        blue_ml = row1[6]
+    cur.close()
     
-    return {"number_of_potions": 0, "ml_in_barrels": 0, "gold": 0}
+    return {"number_of_potions": (green_potions + red_potions + blue_potions), "ml_in_barrels": (green_ml + red_ml + blue_ml), "gold": gold}
 
 # Gets called once a day
 @router.post("/plan")
@@ -24,8 +37,8 @@ def get_capacity_plan():
     """
 
     return {
-        "potion_capacity": 0,
-        "ml_capacity": 0
+        "potion_capacity": 50,
+        "ml_capacity": 1000
         }
 
 class CapacityPurchase(BaseModel):
