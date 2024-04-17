@@ -19,7 +19,7 @@ def get_catalog():
     print(f"Potions Inventory: green: {num_green_potions_num} red: {num_red_potions_num} blue: {num_blue_potions_num}")
     catalog = []
     if (num_green_potions_num > 0):
-        catalog.append([
+        catalog.append(
             {
                 "sku": "GREEN_POTION_0",
                 "name": "green potion",
@@ -27,9 +27,9 @@ def get_catalog():
                 "price": 50,
                 "potion_type": [0, 100, 0, 0],
             }
-        ])
+        )
     if (num_red_potions_num > 0):
-        catalog.append([
+        catalog.append(
             {
                 "sku": "RED_POTION_0",
                 "name": "red potion",
@@ -37,9 +37,9 @@ def get_catalog():
                 "price": 50,
                 "potion_type": [100, 0, 0, 0]
             }
-        ])
+        )
     if (num_blue_potions_num > 0):
-         catalog.append([
+         catalog.append(
             {
                 "sku": "BLUE_POTION_0",
                 "name": "blue potion",
@@ -47,5 +47,5 @@ def get_catalog():
                 "price": 50,
                 "potion_type": [0, 0, 100, 0]
             }
-        ])
+        )
     return catalog
