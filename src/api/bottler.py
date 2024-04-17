@@ -54,17 +54,17 @@ def get_bottle_plan():
     # Expressed in integers from 1 to 100 that must sum up to 100.
 
     with db.engine.begin() as connection:
-                #instead of select * use cons
-                cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
-                #num_green_ml = row1.num_green_ml
-                row1 = cur.fetchone()
-                num_green_ml = row1[1]
-                num_red_ml = row1[5]
-                num_blue_ml = row1[6]
+        #instead of select * use cons
+        cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
+        #num_green_ml = row1.num_green_ml
+        row1 = cur.fetchone()
+        num_green_ml = row1[1]
+        num_red_ml = row1[5]
+        num_blue_ml = row1[6]
     num_g_bottles_to_make = num_green_ml // 100
     num_r_bottles_to_make = num_red_ml // 100
     num_b_bottles_to_make = num_blue_ml // 100
-    print("Attempting to mix {num_g_bottles_to_make} green, {num_r_bottles_to_make} red, and {num_b_bottles_to_make} blue potions.")
+    print(f"Attempting to mix {num_g_bottles_to_make} green, {num_r_bottles_to_make} red, and {num_b_bottles_to_make} blue potions.")
     return [
             {
                 "potion_type": [0, 100, 0, 0],

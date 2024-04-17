@@ -16,7 +16,7 @@ def get_catalog():
         num_green_potions_num = row1[0]
         num_red_potions_num = row1[3]
         num_blue_potions_num = row1[4]
-    print(f"Potions Inventory: green: { num_green_potions_num} red: {num_red_potions_num} blue: {num_blue_potions_num}")
+    print(f"Potions Inventory: green: {num_green_potions_num} red: {num_red_potions_num} blue: {num_blue_potions_num}")
     catalog = []
     if (num_green_potions_num > 0):
         catalog.append([
