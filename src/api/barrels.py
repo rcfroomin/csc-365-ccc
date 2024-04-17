@@ -57,7 +57,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 row1 = cur.fetchone()
                 num_green_potions = row1[0]
                 num_gold = row1[2]
-                cur.close()
             if num_green_potions < 10 and num_gold >= barrel.price:
                 print(f"want to buy a green barrel: {barrel.sku}")
                 return [
@@ -72,7 +71,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 row1 = cur.fetchone()
                 num_red_potions = row1[3]
                 num_gold = row1[2]
-                cur.close()
             if num_red_potions < 10 and num_gold >= barrel.price:
                 print(f"want to buy a red barrel: {barrel.sku}")
                 return [
@@ -87,7 +85,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 row1 = cur.fetchone()
                 num_blue_potions = row1[4]
                 num_gold = row1[2]
-                cur.close()
             if num_blue_potions < 10 and num_gold >= barrel.price:
                 print(f"want to buy a blue barrel: {barrel.sku}")
                 return [

@@ -54,12 +54,13 @@ def get_bottle_plan():
     # Expressed in integers from 1 to 100 that must sum up to 100.
 
     with db.engine.begin() as connection:
+                #instead of select * use cons
                 cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
+                #num_green_ml = row1.num_green_ml
                 row1 = cur.fetchone()
                 num_green_ml = row1[1]
                 num_red_ml = row1[5]
                 num_blue_ml = row1[6]
-                cur.close()
     num_g_bottles_to_make = num_green_ml // 100
     num_r_bottles_to_make = num_red_ml // 100
     num_b_bottles_to_make = num_blue_ml // 100
