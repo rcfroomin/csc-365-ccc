@@ -31,13 +31,13 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml = num_green_ml + " + str(quantity) + ";"))
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold - " + str(price) + ";"))
         elif barrel.potion_type == [1, 0, 0, 0]:
-            quantity = barrel.quantity
+            quantity = barrel.ml_per_barrel
             price = barrel.price
             with db.engine.begin() as connection:
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red_ml + " + str(quantity) + ";"))
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold - " + str(price) + ";"))
         elif barrel.potion_type == [0, 0, 1, 0]:
-            quantity = barrel.quantity
+            quantity = barrel.ml_per_barrel
             price = barrel.price
             with db.engine.begin() as connection:
                 result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_ml = num_blue_ml + " + str(quantity) + ";"))
