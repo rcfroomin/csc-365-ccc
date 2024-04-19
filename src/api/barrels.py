@@ -45,53 +45,54 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
     return "OK"
 
+def get_value(barrel: Barrel):
+    return (barrel.ml_per_barrel / barrel.price)
+
+def get_best_value_barrel(wholesale_catalog: list[Barrel]):
+    best_value = wholesale_catalog[0]
+    for barrel in wholesale_catalog:
+        if get_value(barrel) > get_value(best_value):
+            best_value = barrel
+    return best_value
+
 # Gets called once a day
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
-    print(f"wholesale catalog: {wholesale_catalog}")
-    for barrel in wholesale_catalog:
-        if barrel.potion_type == [0, 1, 0, 0]:
-            with db.engine.begin() as connection:
+    with db.engine.begin() as connection:
                 cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
                 row1 = cur.fetchone()
                 num_green_potions = row1[0]
-                num_gold = row1[2]
-            if num_green_potions < 10 and num_gold >= barrel.price:
-                print(f"want to buy a green barrel: {barrel.sku}")
-                return [
-                    {
-                        "sku": barrel.sku,
-                        "quantity": 1
-                    }
-                ]   
-        if barrel.potion_type == [1, 0, 0, 0]:
-            with db.engine.begin() as connection:
-                cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
-                row1 = cur.fetchone()
                 num_red_potions = row1[3]
-                num_gold = row1[2]
-            if num_red_potions < 10 and num_gold >= barrel.price:
-                print(f"want to buy a red barrel: {barrel.sku}")
-                return [
-                    {
-                        "sku": barrel.sku,
-                        "quantity": 1
-                    }
-                ]   
-        if barrel.potion_type == [0, 0, 1, 0]:
-            with db.engine.begin() as connection:
-                cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
-                row1 = cur.fetchone()
                 num_blue_potions = row1[4]
                 num_gold = row1[2]
-            if num_blue_potions < 10 and num_gold >= barrel.price:
-                print(f"want to buy a blue barrel: {barrel.sku}")
-                return [
-                    {
-                        "sku": barrel.sku,
-                        "quantity": 1
-                    }
-                ]   
-            
+    print(f"wholesale catalog: {wholesale_catalog}")
+    best_barrel = get_best_value_barrel(wholesale_catalog)
+    if best_barrel.potion_type == [0, 1, 0, 0]:
+        if num_green_potions < 10 and num_gold >= best_barrel.price:
+            print(f"want to buy a green barrel: {best_barrel.sku}")
+            return [
+                {
+                    "sku": best_barrel.sku,
+                    "quantity": 1
+                }
+            ]   
+    if best_barrel.potion_type == [1, 0, 0, 0]:
+        if num_red_potions < 10 and num_gold >= best_barrel.price:
+            print(f"want to buy a red barrel: {best_barrel.sku}")
+            return [
+                {
+                    "sku": best_barrel.sku,
+                    "quantity": 1
+                }
+            ]   
+    if best_barrel.potion_type == [0, 0, 1, 0]:
+        if num_blue_potions < 10 and num_gold >= best_barrel.price:
+            print(f"want to buy a blue barrel: {best_barrel.sku}")
+            return [
+                {
+                    "sku": best_barrel.sku,
+                    "quantity": 1
+                }
+            ]   
     return []
