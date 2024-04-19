@@ -66,8 +66,18 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 num_red_potions = row1[3]
                 num_blue_potions = row1[4]
                 num_gold = row1[2]
+    
     print(f"wholesale catalog: {wholesale_catalog}")
+    
     best_barrel = get_best_value_barrel(wholesale_catalog)
+    print(f"best barrel in the catalog: {best_barrel}")
+
+    while (num_gold <= best_barrel.price):
+        wholesale_catalog.remove(best_barrel)
+        best_barrel = get_best_value_barrel(wholesale_catalog)
+
+    print(f"best barrel i can afford: {best_barrel}")
+
     if best_barrel.potion_type == [0, 1, 0, 0]:
         if num_green_potions < 10 and num_gold >= best_barrel.price:
             print(f"want to buy a green barrel: {best_barrel.sku}")
@@ -76,7 +86,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     "sku": best_barrel.sku,
                     "quantity": 1
                 }
-            ]   
+            ]
+
     if best_barrel.potion_type == [1, 0, 0, 0]:
         if num_red_potions < 10 and num_gold >= best_barrel.price:
             print(f"want to buy a red barrel: {best_barrel.sku}")
