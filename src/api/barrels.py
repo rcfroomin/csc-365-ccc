@@ -63,14 +63,16 @@ def get_best_value_barrel(wholesale_catalog: list[Barrel]):
             if get_value(barrel) > get_value(best_value):
                 best_value = barrel
         
-        while (best_value and num_gold <= best_value.price):
+        while (wholesale_catalog and best_value and num_gold < best_value.price):
             wholesale_catalog.remove(best_value) #remove a best barrel if i can't afford it
             best_value = get_best_value_barrel(wholesale_catalog) # find the next best barrel
     
-        if (best_value and (best_value.ml_per_barrel / best_value.price)) > 2: # make sure i'm not losing money bc all my potions are 100ml and cost 50 gold
+        if (best_value and ((best_value.ml_per_barrel / best_value.price) > 2)): # make sure i'm not losing gold bc all my potions are 100ml and cost 50 gold
             return best_value
-        else:
+        elif (wholesale_catalog and best_value):
             get_best_value_barrel(wholesale_catalog.remove(best_value))
+        else:
+            return None
 
 def what_ml_do_i_need():
     with db.engine.begin() as connection:
