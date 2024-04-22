@@ -17,14 +17,19 @@ def get_inventory():
     with db.engine.begin() as connection:
         cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
         row1 = cur.fetchone()
-        green_potions = row1[0]
         gold = row1[2]
-        red_potions = row1[3]
-        blue_potions = row1[4]
         green_ml = row1[1]
         red_ml = row1[5]
         blue_ml = row1[6]
-    cur.close()
+        cur = connection.execute(sqlalchemy.text("SELECT potions.inventory FROM potions WHERE potions.item_sku = 'Red_Potion';"))
+        red_potion = cur.fetchone()
+        red_potions = red_potion[0]
+        cur = connection.execute(sqlalchemy.text("SELECT potions.inventory FROM potions WHERE potions.item_sku = 'Green_Potion';"))
+        green_potion = cur.fetchone()
+        green_potions = green_potion[0]
+        cur = connection.execute(sqlalchemy.text("SELECT potions.inventory FROM potions WHERE potions.item_sku = 'Blue_Potion';"))
+        blue_potion = cur.fetchone()
+        blue_potions = blue_potion[0]
     
     return {"number_of_potions": (green_potions + red_potions + blue_potions), "ml_in_barrels": (green_ml + red_ml + blue_ml), "gold": gold}
 
