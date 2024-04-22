@@ -67,7 +67,7 @@ def get_best_value_barrel(wholesale_catalog: list[Barrel]):
             wholesale_catalog.remove(best_value) #remove a best barrel if i can't afford it
             best_value = get_best_value_barrel(wholesale_catalog) # find the next best barrel
     
-        if (best_value and ((best_value.ml_per_barrel / best_value.price) > 2)): # make sure i'm not losing gold bc all my potions are 100ml and cost 50 gold
+        if (best_value and ((best_value.ml_per_barrel / best_value.price) > 1.82)): # make sure i'm not losing gold bc all my potions are 100ml and cost 55 gold
             return best_value
         elif (wholesale_catalog and best_value):
             get_best_value_barrel(wholesale_catalog.remove(best_value))
@@ -120,7 +120,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     best_barrel = get_best_value_barrel(wholesale_catalog)
     
     if best_barrel == None:
-        print("No barrels in the catalog I wouldn't lose money on when selling for 50 gold.")
+        print("No barrels in the catalog I wouldn't lose money on when selling for 55 gold.")
         return []
     
     print(f"best barrel i can afford: {best_barrel}")
