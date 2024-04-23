@@ -71,7 +71,7 @@ def check_enough(needed: list): # needed = list[potion_sku, potion_type]
 @router.post("/deliver/{order_id}")
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
     """ """
-    print(f"potions delievered: {potions_delivered} order_id: {order_id}")
+    print(f"Potions delievered to Me: {potions_delivered} order_id: {order_id}")
     inv = build_inventory()
     for potion in potions_delivered:
         for item in inv:
@@ -140,7 +140,8 @@ def get_bottle_plan():
             print("Not enough ml to make any potions.")
         else:
             print("Enough ml to make some already stocked potions.")
-
+    
+    print("My Plan to Bottle Potions:", plan)
     return plan
 
 
