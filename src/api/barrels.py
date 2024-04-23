@@ -60,7 +60,7 @@ def get_best_value_barrel(wholesale_catalog: list[Barrel]):
         best_value = wholesale_catalog[0]
     
         for barrel in wholesale_catalog:
-            if get_value(barrel) > get_value(best_value):
+            if (get_value(barrel) > get_value(best_value)) and (barrel.potion_type != [1, 0, 0, 0]):
                 best_value = barrel
         
         while (wholesale_catalog and best_value and num_gold < best_value.price):
