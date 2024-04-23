@@ -60,7 +60,7 @@ def get_best_value_barrel(wholesale_catalog: list[Barrel]):
         best_value = wholesale_catalog[0]
     
         for barrel in wholesale_catalog:
-            if (get_value(barrel) > get_value(best_value)) and (barrel.potion_type != [1, 0, 0, 0]):
+            if (get_value(barrel) > get_value(best_value)) and (barrel.potion_type in what_ml_do_i_need()): # check that barrel in question is better than best barrel so far and then check to make sure its a potion type i need
                 best_value = barrel
         
         while (wholesale_catalog and best_value and num_gold < best_value.price):
@@ -74,28 +74,26 @@ def get_best_value_barrel(wholesale_catalog: list[Barrel]):
         else:
             return None
 
-#def what_ml_do_i_need():
-    #with db.engine.begin() as connection:
-        #cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
-        #row1 = cur.fetchone()
-        #num_green_ml = row1[1]
-        #num_red_ml = row1[5]
-        #num_blue_ml = row1[6]
-        #num_green_potions = row1[0]
-        #num_red_potions = row1[3]
-        #num_blue_potions = row1[4]
+def what_ml_do_i_need(): # returns a list of potion types i have less than 200 ml of
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
+        row1 = cur.fetchone()
+        num_green_ml = row1[1]
+        num_red_ml = row1[5]
+        num_blue_ml = row1[6]
+        num_dark_ml = row1[7]
     
-    #total_green = num_green_ml + (num_green_potions * 100)
-    #total_red = num_red_ml + (num_red_potions * 100)
-    #total_blue = num_blue_ml + (num_blue_potions * 100)
-    #total_all = total_green + total_red + total_blue
-    #colors_needed = [total_red, total_green, total_blue]
+    inv = [[[1, 0, 0, 0], num_red_ml], [[0, 1, 0, 0], num_green_ml], [[0, 0, 1, 0], num_blue_ml], [[0, 0, 0, 1], num_dark_ml]]
+    for ml in inv:
+        if ml[1] > 200:
+            inv.remove(ml)
     
-    #for color in colors_needed:
-        #if ((color / total_all) > .4):
-            #colors_needed.remove(color)
+    i = 0
+    for i in range(len(inv)):
+        inv[i]=inv[i][0]
+        i += 1
     
-    #return colors_needed
+    return inv # returns a list of potion types i have less than 200 ml of
     
 # Gets called once a day
 @router.post("/plan")
