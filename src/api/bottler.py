@@ -99,12 +99,6 @@ def get_bottle_plan():
     # dark potion to add.
     # Expressed in integers from 1 to 100 that must sum up to 100.
     with db.engine.begin() as connection:
-        cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
-        row1 = cur.fetchone()
-        num_red_ml = row1[5]
-        num_green_ml = row1[1]
-        num_blue_ml = row1[6]
-        num_dark_ml = row1[7]
         cur = connection.execute(sqlalchemy.text("SELECT potions.item_sku FROM potions WHERE potions.inventory = 0;"))
         o = cur.fetchall()
         out_of_stock = []
@@ -131,6 +125,7 @@ def get_bottle_plan():
             in_stock = []
             for item in h:
                 in_stock.append(item[0])
+        
         wanted = []
         for potion in in_stock:
             with db.engine.begin() as connection:   
