@@ -21,13 +21,14 @@ def get_inventory():
         green_ml = row1[1]
         red_ml = row1[5]
         blue_ml = row1[6]
+        dark_ml = row1[7]
         cur = connection.execute(sqlalchemy.text("SELECT potions.inventory FROM potions;"))
         potions = cur.fetchall()
         total = 0
         for inventory in potions:
             total += inventory[0]
     
-    return {"number_of_potions": total, "ml_in_barrels": (green_ml + red_ml + blue_ml), "gold": gold}
+    return {"number_of_potions": total, "ml_in_barrels": (green_ml + red_ml + blue_ml + dark_ml), "gold": gold}
 
 # Gets called once a day
 @router.post("/plan")
