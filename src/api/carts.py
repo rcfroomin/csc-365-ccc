@@ -1,3 +1,4 @@
+import random
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from src.api import auth
@@ -87,7 +88,7 @@ def post_visits(visit_id: int, customers: list[Customer]):
 @router.post("/")
 def create_cart(new_cart: Customer):
     """ """
-    return {"cart_id": 1}
+    return {"cart_id": random.randint(1, 1000)}
 
 
 class CartItem(BaseModel):

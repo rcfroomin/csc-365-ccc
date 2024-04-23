@@ -148,20 +148,6 @@ def get_bottle_plan():
 
     return plan
 
-    #return [
-           # {
-          #      "potion_type": [0, 100, 0, 0],
-          #      "quantity": num_g_bottles_to_make,
-           # },
-          #  {
-          #      "potion_type": [100, 0, 0, 0],
-          #      "quantity": num_r_bottles_to_make,
-          #  },
-          #  {
-           #     "potion_type": [0, 0, 100, 0],
-           #     "quantity": num_b_bottles_to_make,
-           # }
-        #]
 
 if __name__ == "__main__":
     print(get_bottle_plan())
