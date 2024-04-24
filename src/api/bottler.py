@@ -31,6 +31,17 @@ def build_inventory():
 
     return catalog
 
+def ml_inv():
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
+        row1 = cur.fetchone()
+        num_green_ml = row1[0]
+        num_red_ml = row1[2]
+        num_blue_ml = row1[3]
+        num_dark_ml = row1[4]
+    
+    return [num_green_ml, num_red_ml, num_blue_ml, num_dark_ml]
+
 def check_enough(needed: list): # needed = list[potion_sku, potion_type]
     plan = []
     with db.engine.begin() as connection:
@@ -135,8 +146,9 @@ def get_bottle_plan():
                 for color in potion_type:
                     potion_type_list.append(color)
                 wanted.append([potion, potion_type_list])
+        
         plan = check_enough(wanted)
-        if plan == []:
+        if (plan == []):
             print("Not enough ml to make any potions.")
         else:
             print("Enough ml to make some already stocked potions.")
