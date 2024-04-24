@@ -93,6 +93,7 @@ def create_cart(new_cart: Customer):
         cur = connection.execute(sqlalchemy.text("SELECT carts.cart_id FROM carts WHERE carts.customer_name = '" + new_cart.customer_name + "' ORDER BY created_at desc;"))
         cart_id = cur.first()[0]
     
+    print("cart_id: " + str(cart_id) + " created for customer: " + new_cart.customer_name)
     return {"cart_id": int(cart_id)}
 
 
@@ -130,4 +131,5 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             result = connection.execute(sqlalchemy.text("UPDATE potions SET inventory = (potions.inventory - " + quantity + ") WHERE potions.item_sku = '" + item_sku + "';"))
             result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = (global_inventory.gold + " + str(int(quantity) * int(price)) + ");"))
          
+    print("cart_id: " + str(cart_id) + " checked out with total quantity: " + str(total_quantity) + " and total payment: " + cart_checkout.payment)
     return {"total_potions_bought": quantity, "total_gold_paid": cart_checkout.payment}
