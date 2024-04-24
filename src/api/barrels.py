@@ -55,7 +55,7 @@ def get_best_value_barrel(wholesale_catalog: list[Barrel]):
         with db.engine.begin() as connection:
                 cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
                 row1 = cur.fetchone()
-                num_gold = row1[2]
+                num_gold = row1[1]
     
         best_value = wholesale_catalog[0]
     
@@ -78,10 +78,10 @@ def what_ml_do_i_need(): # returns a list of potion types i have less than 200 m
     with db.engine.begin() as connection:
         cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
         row1 = cur.fetchone()
-        num_green_ml = row1[1]
-        num_red_ml = row1[5]
-        num_blue_ml = row1[6]
-        num_dark_ml = row1[7]
+        num_green_ml = row1[0]
+        num_red_ml = row1[2]
+        num_blue_ml = row1[3]
+        num_dark_ml = row1[4]
     
     inv = [[[1, 0, 0, 0], num_red_ml], [[0, 1, 0, 0], num_green_ml], [[0, 0, 1, 0], num_blue_ml], [[0, 0, 0, 1], num_dark_ml]]
     for ml in inv:
@@ -102,7 +102,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     with db.engine.begin() as connection:
                 cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
                 row1 = cur.fetchone()
-                num_gold = row1[2]
+                num_gold = row1[1]
                 cur = connection.execute(sqlalchemy.text("SELECT potions.inventory FROM potions WHERE potions.item_sku = 'Red_Potion';"))
                 red_potion = cur.fetchone()
                 num_red_potions = red_potion[0]

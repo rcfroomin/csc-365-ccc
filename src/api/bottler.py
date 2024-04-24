@@ -36,10 +36,10 @@ def check_enough(needed: list): # needed = list[potion_sku, potion_type]
     with db.engine.begin() as connection:
         cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
         row1 = cur.fetchone()
-        num_red_ml = row1[5]
-        num_green_ml = row1[1]
-        num_blue_ml = row1[6]
-        num_dark_ml = row1[7]
+        num_green_ml = row1[0]
+        num_red_ml = row1[2]
+        num_blue_ml = row1[3]
+        num_dark_ml = row1[4]
     
     for potion in needed:
         enough_red = False
