@@ -18,10 +18,10 @@ def get_inventory():
         cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
         row1 = cur.fetchone()
         gold = row1[1]
-        num_green_ml = row1[0]
-        num_red_ml = row1[2]
-        num_blue_ml = row1[3]
-        num_dark_ml = row1[4]
+        green_ml = row1[0]
+        red_ml = row1[2]
+        blue_ml = row1[3]
+        dark_ml = row1[4]
         cur = connection.execute(sqlalchemy.text("SELECT potions.inventory FROM potions;"))
         potions = cur.fetchall()
         total = 0
