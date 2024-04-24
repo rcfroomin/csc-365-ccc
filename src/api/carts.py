@@ -88,7 +88,12 @@ def post_visits(visit_id: int, customers: list[Customer]):
 @router.post("/")
 def create_cart(new_cart: Customer):
     """ """
-    return {"cart_id": random.randint(1, 1000)}
+    with db.engine.begin() as connection:
+                cur = connection.execute(sqlalchemy.text("INSERT INTO carts (customer_name) VALUES ('" + new_cart.customer_name + "');"))
+                cur = connection.execute(sqlalchemy.text("SELECT carts.cart_id FROM carts WHERE carts.customer_name = '" + new_cart.customer_name + "' ORDER BY created_at desc;"))
+                cart_id = cur.first()[0]
+    
+    return {"cart_id": cart_id}
 
 
 class CartItem(BaseModel):
