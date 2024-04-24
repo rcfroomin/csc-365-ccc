@@ -89,9 +89,9 @@ def post_visits(visit_id: int, customers: list[Customer]):
 def create_cart(new_cart: Customer):
     """ """
     with db.engine.begin() as connection:
-                cur = connection.execute(sqlalchemy.text("INSERT INTO carts (customer_name) VALUES ('" + new_cart.customer_name + "');"))
-                cur = connection.execute(sqlalchemy.text("SELECT carts.cart_id FROM carts WHERE carts.customer_name = '" + new_cart.customer_name + "' ORDER BY created_at desc;"))
-                cart_id = cur.first()[0]
+        cur = connection.execute(sqlalchemy.text("INSERT INTO carts (customer_name) VALUES ('" + new_cart.customer_name + "');"))
+        cur = connection.execute(sqlalchemy.text("SELECT carts.cart_id FROM carts WHERE carts.customer_name = '" + new_cart.customer_name + "' ORDER BY created_at desc;"))
+        cart_id = cur.first()[0]
     
     return {"cart_id": cart_id}
 
@@ -118,5 +118,16 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
-
-    return {"total_potions_bought": 1, "total_gold_paid": 55}
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT (cart_items.item_sku, cart_items.quantity, price) FROM cart_items WHERE cart_items.cart_id = '" + str(cart_id) + "';"))
+        items = cur.fetchall()
+    
+    total_quantity = 0
+    for item in items:
+        item_sku, quantity, price = item[0].strip("()").split(',')
+        total_quantity += int(quantity)
+        with db.engine.begin() as connection:
+            result = connection.execute(sqlalchemy.text("UPDATE potions SET inventory = (potions.inventory - " + quantity + ") WHERE potions.item_sku = '" + item_sku + "';"))
+            result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = (global_inventory.gold + " + str(int(quantity) * int(price)) + ");"))
+         
+    return {"total_potions_bought": quantity, "total_gold_paid": cart_checkout.payment}
