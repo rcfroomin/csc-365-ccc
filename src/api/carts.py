@@ -108,7 +108,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         price = cur.first()[0]
         cur = connection.execute(sqlalchemy.text("INSERT INTO cart_items (cart_id, item_sku, quantity, price) VALUES (" + str(cart_id) + ", '" + item_sku + "', " + str(cart_item.quantity) + ", " + str(price) + ");"))
     
-    print("cart_id:" + str(cart_id) + "added" + str(cart_item.quantity) + "of item_sku:" + item_sku)
+    print("cart_id: " + str(cart_id) + " added " + str(cart_item.quantity) + " of item_sku: " + item_sku)
     return "OK"
 
 
