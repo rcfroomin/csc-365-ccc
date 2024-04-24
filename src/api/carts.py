@@ -103,7 +103,12 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
-
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT potions.price FROM potions WHERE potions.item_sku = '" + item_sku + "';"))
+        price = cur.first()[0]
+        cur = connection.execute(sqlalchemy.text("INSERT INTO cart_items (cart_id, item_sku, quantity, price) VALUES (" + str(cart_id) + ", '" + item_sku + "', " + str(cart_item.quantity) + ", " + str(price) + ");"))
+    
+    print("cart_id:" + cart_id + "added" + cart_item.quantity + "of item_sku:" + item_sku)
     return "OK"
 
 
