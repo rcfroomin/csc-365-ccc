@@ -131,5 +131,5 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             result = connection.execute(sqlalchemy.text("UPDATE potions SET inventory = (potions.inventory - " + quantity + ") WHERE potions.item_sku = '" + item_sku + "';"))
             result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = (global_inventory.gold + " + str(int(quantity) * int(price)) + ");"))
          
-    print("cart_id: " + str(cart_id) + " checked out with total quantity: " + str(total_quantity) + " and total payment: " + cart_checkout.payment)
-    return {"total_potions_bought": total_quantity, "total_gold_paid": cart_checkout.payment}
+    print("cart_id: " + str(cart_id) + " checked out with total quantity: " + str(total_quantity) + " and total payment: " + str(int(quantity) * int(price)))
+    return {"total_potions_bought": total_quantity, "total_gold_paid": int(int(quantity) * int(price))}
