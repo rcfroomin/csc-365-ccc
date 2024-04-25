@@ -57,10 +57,16 @@ def get_best_value_barrel(wholesale_catalog: list[Barrel]):
                 row1 = cur.fetchone()
                 num_gold = row1[1]
     
-        best_value = wholesale_catalog[0]
-    
+        best_value = None
+        ml_needed = what_ml_do_i_need()
+        i = 0
+        while (best_value == None):
+            if (wholesale_catalog[i].potion_type in ml_needed): # my algorithm needs to start with a barrel that is a potion type i need in order for it to work correctly
+                best_value = wholesale_catalog[i]
+            i += 1
+        
         for barrel in wholesale_catalog:
-            if (get_value(barrel) > get_value(best_value)) and (barrel.potion_type in what_ml_do_i_need()): # check that barrel in question is better than best barrel so far and then check to make sure its a potion type i need
+            if (get_value(barrel) > get_value(best_value)) and (barrel.potion_type in ml_needed): # check that barrel in question is better than best barrel so far and then check to make sure its a potion type i need
                 best_value = barrel
         
         while (wholesale_catalog and best_value and num_gold < best_value.price):
@@ -93,6 +99,7 @@ def what_ml_do_i_need(): # returns a list of potion types i have less than 200 m
         inv[i]=inv[i][0]
         i += 1
     
+    print("Ml types I need more of: ", inv)
     return inv # returns a list of potion types i have less than 200 ml of
     
 # Gets called once a day
