@@ -15,6 +15,22 @@ class PotionInventory(BaseModel):
     potion_type: list[int]
     quantity: int
 
+def get_current_balance(account_name: str):
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT accounts.account_id FROM accounts WHERE accounts.account_name = '" + account_name + "';"))
+        row1 = cur.fetchone()
+        account_id = row1[0]
+    
+    balance  = 0
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT account_ledger_entries.change FROM account_ledger_entries WHERE account_ledger_entries.account_id = '" + str(account_id) + "';"))
+        transactions = cur.fetchall()
+        
+        for transaction in transactions:
+            balance += transaction[0]
+    
+    return balance
+
 def build_inventory():
     catalog = []
     with db.engine.begin() as connection:
@@ -108,7 +124,7 @@ def get_bottle_plan():
 
     # Each bottle has a quantity of what proportion of red, green, blue and
     # dark potion to add.
-    # Expressed in integers from 1 to 100 that must sum up to 100.
+    # Expressed in integers from 1 to 100 that must sum up to 100.    
     with db.engine.begin() as connection:
         cur = connection.execute(sqlalchemy.text("SELECT potions.item_sku FROM potions WHERE potions.inventory = 0;"))
         o = cur.fetchall()
