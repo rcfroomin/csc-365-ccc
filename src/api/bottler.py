@@ -15,7 +15,7 @@ class PotionInventory(BaseModel):
     potion_type: list[int]
     quantity: int
 
-def get_current_balance(account_name: str):
+def get_current_balance(account_name: str): #UPDATED FOR V4
     with db.engine.begin() as connection:
         cur = connection.execute(sqlalchemy.text("SELECT accounts.account_id FROM accounts WHERE accounts.account_name = '" + account_name + "';"))
         row1 = cur.fetchone()
@@ -31,7 +31,7 @@ def get_current_balance(account_name: str):
     
     return balance
 
-def update_balance(account_name: str, change: int, customer_name: str, description: str):
+def update_balance(account_name: str, change: int, customer_name: str, description: str): #UPDATED FOR V4
     with db.engine.begin() as connection:
         cur = connection.execute(sqlalchemy.text("SELECT accounts.account_id FROM accounts WHERE accounts.account_name = '" + account_name + "';"))
         row1 = cur.fetchone()
@@ -46,9 +46,9 @@ def update_balance(account_name: str, change: int, customer_name: str, descripti
         account_transaction_id = cur.first()[0]
         result = connection.execute(sqlalchemy.text("INSERT INTO account_ledger_entries (account_id, account_transaction_id, change) VALUES (" + str(account_id) + ", " + str(account_transaction_id) + ", " + str(change) + ");"))
 
-    return "OK"
+    return account_transaction_id #Should copy this function's version from admin because it fixes the multiple account transaction entries for one transaction, but will need to fix where this function is called in this file
 
-def build_inventory():
+def build_inventory(): #UPDATED FOR V4
     catalog = []
     with db.engine.begin() as connection:
         cur = connection.execute(sqlalchemy.text("SELECT potions.item_sku FROM potions;"))
@@ -64,27 +64,21 @@ def build_inventory():
 
     return catalog
 
-def ml_inv():
-    with db.engine.begin() as connection:
-        cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
-        row1 = cur.fetchone()
-        num_green_ml = row1[0]
-        num_red_ml = row1[2]
-        num_blue_ml = row1[3]
-        num_dark_ml = row1[4]
-    
+def ml_inv(): #UPDATED FOR V4
+    num_red_ml = get_current_balance("red_ml")
+    num_green_ml = get_current_balance("green_ml")
+    num_blue_ml = get_current_balance("blue_ml")
+    num_dark_ml = get_current_balance("dark_ml")
     return [num_green_ml, num_red_ml, num_blue_ml, num_dark_ml]
 
+#UPDATED FOR V4
 def check_enough(needed: list): # needed = list[potion_sku, potion_type]
     plan = []
-    with db.engine.begin() as connection:
-        cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
-        row1 = cur.fetchone()
-        num_green_ml = row1[0]
-        num_red_ml = row1[2]
-        num_blue_ml = row1[3]
-        num_dark_ml = row1[4]
-    
+    num_red_ml = get_current_balance("red_ml")
+    num_green_ml = get_current_balance("green_ml")
+    num_blue_ml = get_current_balance("blue_ml")
+    num_dark_ml = get_current_balance("dark_ml")
+
     for potion in needed:
         enough_red = False
         enough_green = False
@@ -112,7 +106,7 @@ def check_enough(needed: list): # needed = list[potion_sku, potion_type]
 
     return plan
 
-@router.post("/deliver/{order_id}")
+@router.post("/deliver/{order_id}") #UPDATED FOR V4
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
     """ """
     print(f"Potions delievered to Me: {potions_delivered} order_id: {order_id}")
@@ -120,33 +114,36 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     for potion in potions_delivered:
         for item in inv:
             if potion.potion_type == item[1]:
-                quantity = potion.quantity
                 num_red_ml =item[1][0]
                 num_green_ml = item[1][1]
                 num_blue_ml = item[1][2]
                 num_dark_ml = item[1][3]
-                with db.engine.begin() as connection:
-                    result = connection.execute(sqlalchemy.text("UPDATE potions SET inventory = (potions.inventory + " + str(quantity) + ") WHERE potions.item_sku = '" + item[0] + "';"))
-                    result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red_ml - " + str(num_red_ml) + ";"))
-                    result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml = num_green_ml - " + str(num_green_ml) + ";"))
-                    result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_ml = num_blue_ml - " + str(num_blue_ml) + ";"))
-                    result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_dark_ml = num_dark_ml - " + str(num_dark_ml) + ";"))
+                description = str(item[0]) + " bottled and delivered to me."
+                update_balance(item[0], potion.quantity, None, description)
+                if num_red_ml > 0:
+                    update_balance("red_ml", num_red_ml, None, description)
+                if num_green_ml > 0:
+                    update_balance("green_ml", num_green_ml, None, description)
+                if num_blue_ml > 0:
+                    update_balance("blue_ml", num_blue_ml, None, description)
+                if num_dark_ml > 0:
+                    update_balance("dark_ml", num_dark_ml, None, description)
     return "OK"
 
 @router.post("/plan")
-def get_bottle_plan():
+def get_bottle_plan():  #UPDATED FOR V4
     """
     Go from barrel to bottle.
     """
     # Each bottle has a quantity of what proportion of red, green, blue and
     # dark potion to add.
     # Expressed in integers from 1 to 100 that must sum up to 100.    
-    with db.engine.begin() as connection:
-        cur = connection.execute(sqlalchemy.text("SELECT potions.item_sku FROM potions WHERE potions.inventory = 0;"))
-        o = cur.fetchall()
-        out_of_stock = []
-        for item in o:
-            out_of_stock.append(item[0])
+    inv = build_inventory()
+    out_of_stock = []
+    for potion in inv:
+        balance = get_current_balance(potion[0])
+        if balance == 0:
+            out_of_stock.append(potion[0])
 
     needed = []
     for potion in out_of_stock:
@@ -162,12 +159,11 @@ def get_bottle_plan():
     
     if plan == []:
         print("Not enough ml to make any of the out-of-stock potions.")
-        with db.engine.begin() as connection:
-            cur = connection.execute(sqlalchemy.text("SELECT potions.item_sku FROM potions WHERE potions.inventory > 0;"))
-            h = cur.fetchall()
-            in_stock = []
-            for item in h:
-                in_stock.append(item[0])
+        in_stock = []
+        for potion in inv:
+            balance = get_current_balance(potion[0])
+            if balance > 0:
+                in_stock.append(potion[0])
         
         wanted = []
         for potion in in_stock:

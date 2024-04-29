@@ -27,22 +27,23 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
         if barrel.potion_type == [0, 1, 0, 0]:
             quantity = barrel.ml_per_barrel
             price = barrel.price
-            with db.engine.begin() as connection:
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_ml = num_green_ml + " + str(quantity) + ";"))
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold - " + str(price) + ";"))
+            account_transaction_id = update_balance("green_ml", quantity, None, "Green barrel delivered to me", None)
+            update_balance("gold", -1 * price, None, "Green barrel delivered to me", account_transaction_id)
         elif barrel.potion_type == [1, 0, 0, 0]:
             quantity = barrel.ml_per_barrel
             price = barrel.price
-            with db.engine.begin() as connection:
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red_ml + " + str(quantity) + ";"))
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold - " + str(price) + ";"))
+            account_transaction_id = update_balance("red_ml", quantity, None, "Red barrel delivered to me", None)
+            update_balance("gold", -1 * price, None, "Red barrel delivered to me", account_transaction_id)
         elif barrel.potion_type == [0, 0, 1, 0]:
             quantity = barrel.ml_per_barrel
             price = barrel.price
-            with db.engine.begin() as connection:
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_ml = num_blue_ml + " + str(quantity) + ";"))
-                result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold - " + str(price) + ";"))
-
+            account_transaction_id = update_balance("blue_ml", quantity, None, "Blue barrel delivered to me", None)
+            update_balance("gold", -1 * price, None, "Blue barrel delivered to me", account_transaction_id)
+        elif barrel.potion_type == [0, 0, 0, 1]:
+            quantity = barrel.ml_per_barrel
+            price = barrel.price
+            account_transaction_id = update_balance("dark_ml", quantity, None, "Dark barrel delivered to me", None)
+            update_balance("gold", -1 * price, None, "Dark barrel delivered to me", account_transaction_id)
     return "OK"
 
 def get_value(barrel: Barrel):
@@ -52,10 +53,7 @@ def get_best_value_barrel(wholesale_catalog: list[Barrel]):
     if wholesale_catalog == None or len(wholesale_catalog) == 0:
         return None
     else:
-        with db.engine.begin() as connection:
-                cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
-                row1 = cur.fetchone()
-                num_gold = row1[1]
+        num_gold = get_current_balance("gold")
     
         best_value = None
         ml_needed = what_ml_do_i_need()
@@ -83,13 +81,10 @@ def get_best_value_barrel(wholesale_catalog: list[Barrel]):
             return None
 
 def what_ml_do_i_need(): # returns a list of potion types i have less than 200 ml of
-    with db.engine.begin() as connection:
-        cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
-        row1 = cur.fetchone()
-        num_green_ml = row1[0]
-        num_red_ml = row1[2]
-        num_blue_ml = row1[3]
-        num_dark_ml = row1[4]
+    num_green_ml = get_current_balance("green_ml")
+    num_red_ml = get_current_balance("red_ml")
+    num_blue_ml = get_current_balance("blue_ml")
+    num_dark_ml = get_current_balance("dark_ml")
     
     inv = [[[1, 0, 0, 0], num_red_ml], [[0, 1, 0, 0], num_green_ml], [[0, 0, 1, 0], num_blue_ml], [[0, 0, 0, 1], num_dark_ml]]
     for ml in inv:
@@ -102,15 +97,45 @@ def what_ml_do_i_need(): # returns a list of potion types i have less than 200 m
         i += 1
     
     return inv # returns a list of potion types i have less than 200 ml of
+
+def update_balance(account_name: str, change: int, customer_name: str, description: str, account_transaction_id): #UPDATED FOR V4
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT accounts.account_id FROM accounts WHERE accounts.account_name = '" + account_name + "';"))
+        row1 = cur.fetchone()
+        account_id = row1[0]
+
+    with db.engine.begin() as connection:
+        if account_transaction_id == None: # Create a new account transation in the table and get its id
+            if customer_name:
+                result = connection.execute(sqlalchemy.text("INSERT INTO account_transactions_table (customer_name, description) VALUES ('" + customer_name + "', '" + description + "');"))
+            else:
+                result = connection.execute(sqlalchemy.text("INSERT INTO account_transactions_table (description) VALUES ('" + description + "');"))
+            cur = connection.execute(sqlalchemy.text("SELECT account_transactions_table.id FROM account_transactions_table WHERE account_transactions_table.description = '" + description + "' ORDER BY created_at desc;"))
+            account_transaction_id = cur.first()[0]
+        result = connection.execute(sqlalchemy.text("INSERT INTO account_ledger_entries (account_id, account_transaction_id, change) VALUES (" + str(account_id) + ", " + str(account_transaction_id) + ", " + str(change) + ");"))
+    return account_transaction_id 
+
+def get_current_balance(account_name: str): #UPDATED FOR V4
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT accounts.account_id FROM accounts WHERE accounts.account_name = '" + account_name + "';"))
+        row1 = cur.fetchone()
+        account_id = row1[0]
+
+    balance  = 0
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT account_ledger_entries.change FROM account_ledger_entries WHERE account_ledger_entries.account_id = '" + str(account_id) + "';"))
+        transactions = cur.fetchall()
+        
+        for transaction in transactions:
+            balance += transaction[0]
+    
+    return balance
     
 # Gets called once a day
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
-    with db.engine.begin() as connection:
-                cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
-                row1 = cur.fetchone()
-                num_gold = row1[1]
+    num_gold = get_current_balance("gold")
     
     print(f"wholesale catalog: {wholesale_catalog}")
     

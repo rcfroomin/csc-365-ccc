@@ -84,6 +84,22 @@ def post_visits(visit_id: int, customers: list[Customer]):
 
     return "OK"
 
+def update_balance(account_name: str, change: int, customer_name: str, description: str, account_transaction_id): #UPDATED FOR V4
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT accounts.account_id FROM accounts WHERE accounts.account_name = '" + account_name + "';"))
+        row1 = cur.fetchone()
+        account_id = row1[0]
+
+    with db.engine.begin() as connection:
+        if account_transaction_id == None: # Create a new account transation in the table and get its id
+            if customer_name:
+                result = connection.execute(sqlalchemy.text("INSERT INTO account_transactions_table (customer_name, description) VALUES ('" + customer_name + "', '" + description + "');"))
+            else:
+                result = connection.execute(sqlalchemy.text("INSERT INTO account_transactions_table (description) VALUES ('" + description + "');"))
+            cur = connection.execute(sqlalchemy.text("SELECT account_transactions_table.id FROM account_transactions_table WHERE account_transactions_table.description = '" + description + "' ORDER BY created_at desc;"))
+            account_transaction_id = cur.first()[0]
+        result = connection.execute(sqlalchemy.text("INSERT INTO account_ledger_entries (account_id, account_transaction_id, change) VALUES (" + str(account_id) + ", " + str(account_transaction_id) + ", " + str(change) + ");"))
+    return account_transaction_id 
 
 @router.post("/")
 def create_cart(new_cart: Customer):
@@ -127,9 +143,15 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     for item in items:
         item_sku, quantity, price = item[0].strip("()").split(',')
         total_quantity += int(quantity)
+        
         with db.engine.begin() as connection:
-            result = connection.execute(sqlalchemy.text("UPDATE potions SET inventory = (potions.inventory - " + quantity + ") WHERE potions.item_sku = '" + item_sku + "';"))
-            result = connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = (global_inventory.gold + " + str(int(quantity) * int(price)) + ");"))
-         
+            cur = connection.execute(sqlalchemy.text("SELECT carts.customer_name FROM carts WHERE carts.cart_id = '" + str(cart_id) + "' ORDER BY created_at desc;"))
+            customer_name = cur.first()[0]
+        
+        description = customer_name + " bought " + str(quantity) + " of " + item_sku + " for " + str(int(quantity) * int(price)) + " gold"
+
+        account_transaction_id = update_balance("gold", int(quantity) * int(price), customer_name, description, None)
+        update_balance(item_sku, -1 * int(quantity), customer_name, description, account_transaction_id)
+    
     print("cart_id: " + str(cart_id) + " checked out with total quantity: " + str(total_quantity) + " and total payment: " + str(int(quantity) * int(price)))
     return {"total_potions_bought": total_quantity, "total_gold_paid": int(int(quantity) * int(price))}
