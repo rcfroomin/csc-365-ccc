@@ -59,6 +59,8 @@ def get_best_value_barrel(wholesale_catalog: list[Barrel]):
     
         best_value = None
         ml_needed = what_ml_do_i_need()
+        print("Ml types I need more of: ", ml_needed)
+
         i = 0
         while (best_value == None):
             if (wholesale_catalog[i].potion_type in ml_needed): # my algorithm needs to start with a barrel that is a potion type i need in order for it to work correctly
@@ -99,7 +101,6 @@ def what_ml_do_i_need(): # returns a list of potion types i have less than 200 m
         inv[i]=inv[i][0]
         i += 1
     
-    print("Ml types I need more of: ", inv)
     return inv # returns a list of potion types i have less than 200 ml of
     
 # Gets called once a day
@@ -110,15 +111,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 cur = connection.execute(sqlalchemy.text("SELECT * from global_inventory;"))
                 row1 = cur.fetchone()
                 num_gold = row1[1]
-                cur = connection.execute(sqlalchemy.text("SELECT potions.inventory FROM potions WHERE potions.item_sku = 'Red_Potion';"))
-                red_potion = cur.fetchone()
-                num_red_potions = red_potion[0]
-                cur = connection.execute(sqlalchemy.text("SELECT potions.inventory FROM potions WHERE potions.item_sku = 'Green_Potion';"))
-                green_potion = cur.fetchone()
-                num_green_potions = green_potion[0]
-                cur = connection.execute(sqlalchemy.text("SELECT potions.inventory FROM potions WHERE potions.item_sku = 'Blue_Potion';"))
-                blue_potion = cur.fetchone()
-                num_blue_potions = blue_potion[0]
     
     print(f"wholesale catalog: {wholesale_catalog}")
     
