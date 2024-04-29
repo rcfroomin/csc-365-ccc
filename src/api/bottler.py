@@ -20,7 +20,7 @@ def get_current_balance(account_name: str):
         cur = connection.execute(sqlalchemy.text("SELECT accounts.account_id FROM accounts WHERE accounts.account_name = '" + account_name + "';"))
         row1 = cur.fetchone()
         account_id = row1[0]
-    
+
     balance  = 0
     with db.engine.begin() as connection:
         cur = connection.execute(sqlalchemy.text("SELECT account_ledger_entries.change FROM account_ledger_entries WHERE account_ledger_entries.account_id = '" + str(account_id) + "';"))
@@ -30,6 +30,22 @@ def get_current_balance(account_name: str):
             balance += transaction[0]
     
     return balance
+
+def update_balance(account_name: str, change: int, customer_name: str, description: str):
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT accounts.account_id FROM accounts WHERE accounts.account_name = '" + account_name + "';"))
+        row1 = cur.fetchone()
+        account_id = row1[0]
+
+    with db.engine.begin() as connection:
+        if customer_name:
+            result = connection.execute(sqlalchemy.text("INSERT INTO account_transactions_table (customer_name, description) VALUES ('" + customer_name + "', '" + description + "');"))
+        else:
+            result = connection.execute(sqlalchemy.text("INSERT INTO account_transactions_table (description) VALUES ('" + description + "');"))
+        
+        cur = connection.execute(sqlalchemy.text("SELECT account_transactions_table.id FROM account_transactions_table WHERE account_transactions_table.description = '" + description + "' ORDER BY created_at desc;"))
+        account_transaction_id = cur.first()[0]
+        result = connection.execute(sqlalchemy.text("INSERT INTO account_ledger_entries (account_id, account_transaction_id, change) VALUES (" + str(account_id) + ", " + str(account_transaction_id) + ", " + str(change) + ");"))
 
 def build_inventory():
     catalog = []
@@ -121,7 +137,6 @@ def get_bottle_plan():
     """
     Go from barrel to bottle.
     """
-
     # Each bottle has a quantity of what proportion of red, green, blue and
     # dark potion to add.
     # Expressed in integers from 1 to 100 that must sum up to 100.    
