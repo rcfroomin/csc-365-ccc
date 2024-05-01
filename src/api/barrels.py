@@ -57,7 +57,7 @@ def get_best_value_barrel(wholesale_catalog: list[Barrel]):
     
         best_value = None
         ml_needed = what_ml_do_i_need()
-        print("Ml types I need more of: ", ml_needed)
+        #print("Ml types I need more of: ", ml_needed)
 
         i = 0
         while (best_value == None):
