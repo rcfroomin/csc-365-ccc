@@ -121,13 +121,13 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 description = str(item[0]) + " bottled and delivered to me."
                 update_balance(item[0], potion.quantity, None, description)
                 if num_red_ml > 0:
-                    update_balance("red_ml", num_red_ml, None, description)
+                    update_balance("red_ml", (-1 * num_red_ml), None, description)
                 if num_green_ml > 0:
-                    update_balance("green_ml", num_green_ml, None, description)
+                    update_balance("green_ml", (-1 * num_green_ml), None, description)
                 if num_blue_ml > 0:
-                    update_balance("blue_ml", num_blue_ml, None, description)
+                    update_balance("blue_ml", (-1 * num_blue_ml), None, description)
                 if num_dark_ml > 0:
-                    update_balance("dark_ml", num_dark_ml, None, description)
+                    update_balance("dark_ml", (-1 * num_dark_ml), None, description)
     return "OK"
 
 @router.post("/plan")
