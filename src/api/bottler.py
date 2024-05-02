@@ -15,7 +15,7 @@ class PotionInventory(BaseModel):
     potion_type: list[int]
     quantity: int
 
-def get_current_balance(account_name: str): #UPDATED FOR V4
+def get_current_balance(account_name: str): 
     with db.engine.begin() as connection:
         cur = connection.execute(sqlalchemy.text("SELECT accounts.account_id FROM accounts WHERE accounts.account_name = '" + account_name + "';"))
         row1 = cur.fetchone()
@@ -31,24 +31,24 @@ def get_current_balance(account_name: str): #UPDATED FOR V4
     
     return balance
 
-def update_balance(account_name: str, change: int, customer_name: str, description: str): #UPDATED FOR V4
+def update_balance(account_name: str, change: int, customer_name: str, description: str, account_transaction_id): 
     with db.engine.begin() as connection:
         cur = connection.execute(sqlalchemy.text("SELECT accounts.account_id FROM accounts WHERE accounts.account_name = '" + account_name + "';"))
         row1 = cur.fetchone()
         account_id = row1[0]
 
     with db.engine.begin() as connection:
-        if customer_name:
-            result = connection.execute(sqlalchemy.text("INSERT INTO account_transactions_table (customer_name, description) VALUES ('" + customer_name + "', '" + description + "');"))
-        else:
-            result = connection.execute(sqlalchemy.text("INSERT INTO account_transactions_table (description) VALUES ('" + description + "');"))
-        cur = connection.execute(sqlalchemy.text("SELECT account_transactions_table.id FROM account_transactions_table WHERE account_transactions_table.description = '" + description + "' ORDER BY created_at desc;"))
-        account_transaction_id = cur.first()[0]
+        if account_transaction_id == None: # Create a new account transation in the table and get its id
+            if customer_name:
+                result = connection.execute(sqlalchemy.text("INSERT INTO account_transactions_table (customer_name, description) VALUES ('" + customer_name + "', '" + description + "');"))
+            else:
+                result = connection.execute(sqlalchemy.text("INSERT INTO account_transactions_table (description) VALUES ('" + description + "');"))
+            cur = connection.execute(sqlalchemy.text("SELECT account_transactions_table.id FROM account_transactions_table WHERE account_transactions_table.description = '" + description + "' ORDER BY created_at desc;"))
+            account_transaction_id = cur.first()[0]
         result = connection.execute(sqlalchemy.text("INSERT INTO account_ledger_entries (account_id, account_transaction_id, change) VALUES (" + str(account_id) + ", " + str(account_transaction_id) + ", " + str(change) + ");"))
+    return account_transaction_id 
 
-    return account_transaction_id #Should copy this function's version from admin because it fixes the multiple account transaction entries for one transaction, but will need to fix where this function is called in this file
-
-def build_inventory(): #UPDATED FOR V4
+def build_inventory(): 
     catalog = []
     with db.engine.begin() as connection:
         cur = connection.execute(sqlalchemy.text("SELECT potions.item_sku FROM potions;"))
@@ -119,15 +119,15 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 num_blue_ml = item[1][2]
                 num_dark_ml = item[1][3]
                 description = str(item[0]) + " bottled and delivered to me."
-                update_balance(item[0], potion.quantity, None, description)
+                account_transaction_id = update_balance(item[0], potion.quantity, None, description, None)
                 if num_red_ml > 0:
-                    update_balance("red_ml", (-1 * num_red_ml), None, description)
+                    update_balance("red_ml", (-1 * num_red_ml), None, description, account_transaction_id)
                 if num_green_ml > 0:
-                    update_balance("green_ml", (-1 * num_green_ml), None, description)
+                    update_balance("green_ml", (-1 * num_green_ml), None, description, account_transaction_id)
                 if num_blue_ml > 0:
-                    update_balance("blue_ml", (-1 * num_blue_ml), None, description)
+                    update_balance("blue_ml", (-1 * num_blue_ml), None, description, account_transaction_id)
                 if num_dark_ml > 0:
-                    update_balance("dark_ml", (-1 * num_dark_ml), None, description)
+                    update_balance("dark_ml", (-1 * num_dark_ml), None, description, account_transaction_id)
     return "OK"
 
 @router.post("/plan")
