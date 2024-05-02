@@ -64,14 +64,13 @@ def build_inventory():
 
     return catalog
 
-def ml_inv(): #UPDATED FOR V4
+def ml_inv(): 
     num_red_ml = get_current_balance("red_ml")
     num_green_ml = get_current_balance("green_ml")
     num_blue_ml = get_current_balance("blue_ml")
     num_dark_ml = get_current_balance("dark_ml")
     return [num_green_ml, num_red_ml, num_blue_ml, num_dark_ml]
 
-#UPDATED FOR V4
 def check_enough(needed: list): # needed = list[potion_sku, potion_type]
     plan = []
     num_red_ml = get_current_balance("red_ml")
@@ -106,7 +105,7 @@ def check_enough(needed: list): # needed = list[potion_sku, potion_type]
 
     return plan
 
-@router.post("/deliver/{order_id}") #UPDATED FOR V4
+@router.post("/deliver/{order_id}")
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
     """ """
     print(f"Potions delievered to Me: {potions_delivered} order_id: {order_id}")
@@ -131,7 +130,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     return "OK"
 
 @router.post("/plan")
-def get_bottle_plan():  #UPDATED FOR V4
+def get_bottle_plan(): 
     """
     Go from barrel to bottle.
     """
