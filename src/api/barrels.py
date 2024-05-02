@@ -60,7 +60,7 @@ def get_best_value_barrel(wholesale_catalog: list[Barrel]):
         #print("Ml types I need more of: ", ml_needed)
 
         i = 0
-        while (best_value == None and wholesale_catalog[i]):
+        while (best_value == None and i < len(wholesale_catalog)):
             if (wholesale_catalog[i].potion_type in ml_needed): # my algorithm needs to start with a barrel that is a potion type i need in order for it to work correctly
                 best_value = wholesale_catalog[i]
             i += 1
