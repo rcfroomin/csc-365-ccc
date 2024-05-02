@@ -148,7 +148,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             cur = connection.execute(sqlalchemy.text("SELECT carts.customer_name FROM carts WHERE carts.cart_id = '" + str(cart_id) + "' ORDER BY created_at desc;"))
             customer_name = cur.first()[0]
         
-        description = customer_name + " bought " + str(quantity) + " of " + item_sku + " for " + str(int(quantity) * int(price)) + " gold"
+        description = customer_name + " bought " + str(quantity) + " " + item_sku + " for " + str(int(quantity) * int(price)) + " gold"
 
         account_transaction_id = update_balance("gold", int(quantity) * int(price), customer_name, description, None)
         update_balance(item_sku, -1 * int(quantity), customer_name, description, account_transaction_id)
