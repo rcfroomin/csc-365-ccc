@@ -87,7 +87,7 @@ def search_orders(
     elif sort_order == search_sort_order.desc or sort_order == None:
         results = sorted(results, key=lambda x: x[sort_col], reverse=True)
     
-    if search_page == "":
+    if search_page == "" or search_page == 0:
         search_page = 0
         previous = ""
         if len(results) > 5:
