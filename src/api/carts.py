@@ -102,7 +102,6 @@ def search_orders(
             next = "https://csc-365-ccc-webservice.onrender.com/carts/search/?customer_name=" + customer_name + "&potion_sku=" + potion_sku + "&search_page=" + str(search_page + 1) + "&sort_col=" + sort_col + "&sort_order=" + sort_order
     
     search_start_result = search_page * 5
-    print("next url: ", next)
 
     """
     Search for cart line items by customer name and/or potion sku.
