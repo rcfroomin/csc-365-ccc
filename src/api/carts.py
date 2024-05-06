@@ -91,7 +91,7 @@ def search_orders(
         search_page = 0
         previous = ""
         if len(results) >= 10:
-            next = "/carts/search/?customer_name=" + customer_name + "&potion_sku=" + potion_sku + "&search_page=1&sort_col=" + sort_col + "&sort_order=" + sort_order
+            next = "https://csc-365-ccc-webservice.onrender.com/carts/search/?customer_name=" + customer_name + "&potion_sku=" + potion_sku + "&search_page=1&sort_col=" + sort_col + "&sort_order=" + sort_order
         else:
             next = ""
     else:
