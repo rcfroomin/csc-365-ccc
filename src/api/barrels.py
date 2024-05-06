@@ -114,7 +114,7 @@ def update_balance(account_name: str, change: int, customer_name: str, descripti
         result = connection.execute(sqlalchemy.text("INSERT INTO account_ledger_entries (account_id, account_transaction_id, change) VALUES (" + str(account_id) + ", " + str(account_transaction_id) + ", " + str(change) + ");"))
     return account_transaction_id 
 
-def get_current_balance(account_name: str): #UPDATED FOR V4
+def get_current_balance(account_name: str): 
     with db.engine.begin() as connection:
         cur = connection.execute(sqlalchemy.text("SELECT accounts.account_id FROM accounts WHERE accounts.account_name = '" + account_name + "';"))
         row1 = cur.fetchone()

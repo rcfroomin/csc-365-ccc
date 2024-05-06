@@ -20,7 +20,26 @@ class search_sort_options(str, Enum):
 
 class search_sort_order(str, Enum):
     asc = "asc"
-    desc = "desc"   
+    desc = "desc" 
+
+def get_transaction_amount(account_transaction_id: int): 
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT account_ledger_entries.change FROM account_ledger_entries WHERE account_ledger_entries.account_transaction_id = '" + str(account_transaction_id) + "';"))
+        row1 = cur.fetchone()
+        change = row1[0]
+    
+    return change  
+
+def get_transaction_item(account_transaction_id: int): 
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT account_ledger_entries.account_id FROM account_ledger_entries WHERE account_ledger_entries.account_transaction_id = '" + str(account_transaction_id) + "';"))
+        row1 = cur.fetchall()
+        account_id = row1[1][0]
+        cur = connection.execute(sqlalchemy.text("SELECT accounts.account_name FROM accounts WHERE accounts.account_id = '" + str(account_id) + "';"))
+        row1 = cur.fetchone()
+        account_name = row1[0]
+
+    return account_name  
 
 @router.get("/search/", tags=["search"])
 def search_orders(
@@ -30,6 +49,59 @@ def search_orders(
     sort_col: search_sort_options = search_sort_options.timestamp,
     sort_order: search_sort_order = search_sort_order.desc,
 ):
+    with db.engine.begin() as connection:
+        cur = connection.execute(sqlalchemy.text("SELECT account_transactions_table.id, account_transactions_table.description, account_transactions_table.customer_name, account_transactions_table.created_at FROM account_transactions_table WHERE account_transactions_table.customer_name IS NOT NULL;"))
+        history = cur.fetchall()
+    
+    orders = []
+    orders = history.copy()
+    for transaction in history:
+        item_sku = get_transaction_item(transaction[0])
+        name = transaction[2]
+        if customer_name != "" and customer_name != name:
+            orders.remove(transaction)
+        elif potion_sku != "" and potion_sku != item_sku:
+            orders.remove(transaction)
+    
+    results = []
+    for order in orders:
+        item_sku = get_transaction_item(order[0])
+        if item_sku == 'gold': # fixes a small bug for now
+            continue
+        name = order[2]
+        line_item_total = get_transaction_amount(order[0])
+        time = order[3].isoformat()    
+        transaction_id = order[0]
+        result = {"line_item_id": transaction_id, "item_sku": item_sku, "customer_name": name, "line_item_total": line_item_total, "timestamp": time}
+        results.append(result)
+    if sort_col == search_sort_options.customer_name:
+        results = sorted(results, key=lambda x: x["customer_name"])
+    elif sort_col == search_sort_options.item_sku:
+        results = sorted(results, key=lambda x: x["item_sku"])
+    elif sort_col == search_sort_options.line_item_total:
+        results = sorted(results, key=lambda x: x["line_item_total"])
+    elif sort_col == search_sort_options.timestamp or sort_col == None:
+        results = sorted(results, key=lambda x: x["timestamp"])
+    if sort_order == search_sort_order.asc:
+        results = sorted(results, key=lambda x: x[sort_col])
+    elif sort_order == search_sort_order.desc or sort_order == None:
+        results = sorted(results, key=lambda x: x[sort_col], reverse=True)
+    
+    if search_page == "":
+        search_page = 0
+        previous = ""
+        if len(results) >= 10:
+            next = "/carts/search/?customer_name=" + customer_name + "&potion_sku=" + potion_sku + "&search_page=1&sort_col=" + sort_col + "&sort_order=" + sort_order
+        else:
+            next = ""
+    else:
+        search_page = int(search_page)
+        if search_page >= 1 and search_page < len(results) / 5:
+            previous = "/carts/search/?customer_name=" + customer_name + "&potion_sku=" + potion_sku + "&search_page=" + str(search_page - 1) + "&sort_col=" + sort_col + "&sort_order=" + sort_order
+        if search_page < len(results) / 5 - 1:
+            next = "/carts/search/?customer_name=" + customer_name + "&potion_sku=" + potion_sku + "&search_page=" + str(search_page + 1) + "&sort_col=" + sort_col + "&sort_order=" + sort_order
+    search_start_result = search_page * 5
+
     """
     Search for cart line items by customer name and/or potion sku.
 
@@ -56,17 +128,9 @@ def search_orders(
     """
 
     return {
-        "previous": "",
-        "next": "",
-        "results": [
-            {
-                "line_item_id": 1,
-                "item_sku": "1 oblivion potion",
-                "customer_name": "Scaramouche",
-                "line_item_total": 50,
-                "timestamp": "2021-01-01T00:00:00Z",
-            }
-        ],
+        "previous": previous,
+        "next": next,
+        "results": results[search_start_result : search_start_result + 5],
     }
 
 
