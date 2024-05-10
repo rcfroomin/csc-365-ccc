@@ -95,7 +95,7 @@ def search_orders(
         else:
             next = ""
     else:
-        search_page = int(float(search_page))
+        search_page = int(search_page)
         if search_page >= 1 and search_page < len(results) / 5:
             previous = "https://csc-365-ccc-webservice.onrender.com/carts/search/?customer_name=" + customer_name + "&potion_sku=" + potion_sku + "&search_page=" + str(search_page - 1) + "&sort_col=" + sort_col + "&sort_order=" + sort_order
         if search_page < len(results) / 5 - 1:
