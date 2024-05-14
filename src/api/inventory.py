@@ -44,7 +44,7 @@ def get_capacity_plan():
     elif gold >= 1000 and (get_total_potions_in_inventory() >= 45):
         potion_capacity += 1
         print("Want to buy 1 more potion_capacity")
-    elif gold >= 1000 and (get_total_ml_in_inventory() >= 8000):
+    elif gold >= 1000 and (get_total_ml_in_inventory() >= 5000):
         ml_capacity += 1
         print("Want to buy 1 more ml_capacity")
 
